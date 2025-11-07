@@ -14,6 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 // Annotation tells JUnit to use Mockito
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
@@ -50,6 +55,29 @@ class BookServiceTest {
                 .deleted(false)
                 .createdAt(java.time.Instant.now())
                 .build();
+    }
+
+    // --------- TESTS ------------
+
+    @Test
+    void testCreateBook_Success() {
+
+        // Arrange: tell the mock repository what to do when called
+        when(testBookRepository.save(any(Book.class))).thenReturn(persistedBook);
+
+        // Act: call the service method we are testing
+        Book result = testBookService.createBook(validBookRequest);
+
+        // Assert: Check the outcome
+        assertNotNull(result);
+        assertEquals(testId, result.getId());
+        assertEquals(validBookRequest.getTitle(), result.getTitle());
+        assertEquals(validBookRequest.getSynopsis(), result.getSynopsis());
+        assertEquals(validBookRequest.getAuthor(), result.getAuthor());
+
+        // Did the service perform the correct action on its dependency?
+        verify(testBookRepository, times(1)).save(any(Book.class));
+
     }
 
 }
