@@ -12,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.Assert;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -162,61 +164,112 @@ class BookServiceTest {
     }
 
     // ----- EDGE cases ---------
-    @Test
-    void testCreateBook_VeryLongTitle_Success() {
-        // Arrange
-        String longTitle = "A".repeat(500);
-        BookRequest longTitleRequest = new BookRequest(longTitle, "Synopsis", "Author");
 
-        Book expectedBook = Book.builder()
-                .id(testId)
-                .title(longTitle)
-                .synopsis("Synopsis")
-                .author("Author")
-                .build();
+    @ParameterizedTest
+    @CsvSource({
+            "500, title, 'A very long title test'",
+            "1000, synopsis, 'A very long synopsis test'"
+    })
+    void testCreateBook_VeryLongFields_Success(int repeatCount, String fieldType, String description) {
+
+        // Arrange
+        String longText = "A".repeat(repeatCount);
+
+        BookRequest request;
+        Book expectedBook;
+
+        if (fieldType.equals("title")) {
+            request = new BookRequest(longText, "Synopsis", "Author");
+            expectedBook = Book.builder()
+                    .id(testId)
+                    .title(longText)
+                    .synopsis("Synopsis")
+                    .author("Author")
+                    .build();
+        } else {
+            request = new BookRequest("Title", longText, "Author");
+            expectedBook = Book.builder()
+                    .id(testId)
+                    .title("Title")
+                    .synopsis(longText)
+                    .author("Author")
+                    .build();
+        }
 
         when(testBookRepository.save(any(Book.class)))
                 .thenReturn(expectedBook);
 
         // Act
-        Book result = testBookService.createBook(longTitleRequest);
+        Book result = testBookService.createBook(request);
 
         // Assert
         assertNotNull(result);
         assertEquals(testId, result.getId());
-        assertEquals(longTitle, result.getTitle());
-        assertEquals(expectedBook.getSynopsis(), result.getSynopsis());
-        assertEquals(expectedBook.getAuthor(), result.getAuthor());
 
-        // Did the service perform the correct action on its dependency?
+        if (fieldType.equals("title")) {
+            assertEquals(longText, result.getTitle());
+        } else {
+            assertEquals(longText, result.getSynopsis());
+        }
+
         verify(testBookRepository, times(1)).save(any(Book.class));
-
     }
 
-    @Test
-    void testCreateBook_VeryLongSynopsis_Success() {
-
-        // Arrange
-        String longSynopsis = "A".repeat(1000);
-        BookRequest longSynopsisRequest = new BookRequest("Title", longSynopsis, "Author");
-
-        Book expectedBook = Book.builder()
-                .id(testId)
-                .title("Title")
-                .synopsis(longSynopsis)
-                .author("Author")
-                .build();
-
-        when(testBookRepository.save(any(Book.class)))
-                .thenReturn(expectedBook);
-
-        // Act
-        Book result = testBookService.createBook(longSynopsisRequest);
-
-        // Assert
-        assertEquals(longSynopsis, result.getSynopsis());
-
-    }
+//    @Test
+//    void testCreateBook_VeryLongTitle_Success() {
+//        // Arrange
+//        String longTitle = "A".repeat(500);
+//        BookRequest longTitleRequest = new BookRequest(longTitle, "Synopsis", "Author");
+//
+//        Book expectedBook = Book.builder()
+//                .id(testId)
+//                .title(longTitle)
+//                .synopsis("Synopsis")
+//                .author("Author")
+//                .build();
+//
+//        when(testBookRepository.save(any(Book.class)))
+//                .thenReturn(expectedBook);
+//
+//        // Act
+//        Book result = testBookService.createBook(longTitleRequest);
+//
+//        // Assert
+//        assertNotNull(result);
+//        assertEquals(testId, result.getId());
+//        assertEquals(longTitle, result.getTitle());
+//        assertEquals(expectedBook.getSynopsis(), result.getSynopsis());
+//        assertEquals(expectedBook.getAuthor(), result.getAuthor());
+//
+//        // Did the service perform the correct action on its dependency?
+//        verify(testBookRepository, times(1)).save(any(Book.class));
+//
+//    }
+//
+//    @Test
+//    void testCreateBook_VeryLongSynopsis_Success() {
+//
+//        // Arrange
+//        String longSynopsis = "A".repeat(1000);
+//        BookRequest longSynopsisRequest = new BookRequest("Title", longSynopsis, "Author");
+//
+//        Book expectedBook = Book.builder()
+//                .id(testId)
+//                .title("Title")
+//                .synopsis(longSynopsis)
+//                .author("Author")
+//                .build();
+//
+//        when(testBookRepository.save(any(Book.class)))
+//                .thenReturn(expectedBook);
+//
+//        // Act
+//        Book result = testBookService.createBook(longSynopsisRequest);
+//
+//        // Assert
+//        assertEquals(longSynopsis, result.getSynopsis());
+//
+//    }
 
     @Test
     void testCreateBook_SpecialCharactersInTitle_Success() {
