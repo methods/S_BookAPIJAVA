@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.Assert;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -157,5 +159,95 @@ class BookServiceTest {
         assertThrows(IllegalStateException.class, () -> {
             testBookService.createBook(validBookRequest);
         });
+    }
+
+    // ----- EDGE cases ---------
+    @Test
+    void testCreateBook_VeryLongTitle_Success() {
+        // Arrange
+        String longTitle = "A".repeat(500);
+        BookRequest longTitleRequest = new BookRequest(longTitle, "Synopsis", "Author");
+
+        Book expectedBook = Book.builder()
+                .id(testId)
+                .title(longTitle)
+                .synopsis("Synopsis")
+                .author("Author")
+                .build();
+
+        when(testBookRepository.save(any(Book.class)))
+                .thenReturn(expectedBook);
+
+        // Act
+        Book result = testBookService.createBook(longTitleRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(testId, result.getId());
+        assertEquals(longTitle, result.getTitle());
+        assertEquals(expectedBook.getSynopsis(), result.getSynopsis());
+        assertEquals(expectedBook.getAuthor(), result.getAuthor());
+
+        // Did the service perform the correct action on its dependency?
+        verify(testBookRepository, times(1)).save(any(Book.class));
+
+    }
+
+    @Test
+    void testCreateBook_VeryLongSynopsis_Success() {
+
+        // Arrange
+        String longSynopsis = "A".repeat(1000);
+        BookRequest longSynopsisRequest = new BookRequest("Title", longSynopsis, "Author");
+
+        Book expectedBook = Book.builder()
+                .id(testId)
+                .title("Title")
+                .synopsis(longSynopsis)
+                .author("Author")
+                .build();
+
+        when(testBookRepository.save(any(Book.class)))
+                .thenReturn(expectedBook);
+
+        // Act
+        Book result = testBookService.createBook(longSynopsisRequest);
+
+        // Assert
+        assertEquals(longSynopsis, result.getSynopsis());
+
+    }
+
+    @Test
+    void testCreateBook_SpecialCharactersInTitle_Success() {
+        // Arrange
+        BookRequest specialRequest = new BookRequest(
+                "Test: A Book! @#$%^&*()",
+                "Synopsis",
+                "Author"
+        );
+
+        Book expectedBook = Book.builder()
+                .id(testId)
+                .title(specialRequest.getTitle())
+                .synopsis(specialRequest.getSynopsis())
+                .author(specialRequest.getAuthor())
+                .build();
+
+        when(testBookRepository.save(any(Book.class)))
+                .thenReturn(expectedBook);
+
+        // Act
+        Book result = testBookService.createBook(specialRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(testId, result.getId());
+        assertEquals(specialRequest.getTitle(), result.getTitle());
+        assertEquals(specialRequest.getSynopsis(), result.getSynopsis());
+        assertEquals(specialRequest.getAuthor(), result.getAuthor());
+
+        // Did the service perform the correct action on its dependency?
+        verify(testBookRepository, times(1)).save(any(Book.class));
     }
 }
