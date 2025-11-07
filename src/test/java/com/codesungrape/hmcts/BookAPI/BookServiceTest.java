@@ -81,6 +81,14 @@ class BookServiceTest {
     }
 
     @Test
+    void testCreateBook_NullRequest_ThrowsException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> {
+            testBookService.createBook(null);
+        });
+    }
+
+    @Test
     void testCreateBook_NullTitle_ThrowsException() {
         // Arrange
         BookRequest invalidRequest = new BookRequest(null, "Synopsis", "Author");
