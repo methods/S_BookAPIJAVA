@@ -81,6 +81,31 @@ class BookServiceTest {
     }
 
     @Test
+    void testCreateBook_NullTitle_ThrowsException() {
+        // Arrange
+        BookRequest invalidRequest = new BookRequest(null, "Synopsis", "Author");
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            testBookService.createBook(invalidRequest);
+        });
+
+        // Verify repository was never called
+        verify(testBookRepository, never()).save(any());
+    }
+
+    @Test
+    void testCreateBook_EmptyTitle_ThrowsException() {
+        // Arrange
+        BookRequest invalidRequest = new BookRequest("", "Synopsis", "Author");
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            testBookService.createBook(invalidRequest);
+        });
+    }
+
+    @Test
     void testCreateBook_BlankTitle_ThrowsException() {
         // Arrange
         BookRequest invalidRequest = new BookRequest("   ", "Synopsis", "Author");
