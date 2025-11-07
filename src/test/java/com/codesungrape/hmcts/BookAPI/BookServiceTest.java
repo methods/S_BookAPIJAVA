@@ -80,4 +80,14 @@ class BookServiceTest {
 
     }
 
+    @Test
+    void testCreateBook_BlankTitle_ThrowsException() {
+        // Arrange
+        BookRequest invalidRequest = new BookRequest("   ", "Synopsis", "Author");
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            testBookService.createBook(invalidRequest);
+        });
+    }
 }
