@@ -41,7 +41,7 @@ public class BookService {
 
         Book savedBook = bookRepository.save(newBook);
 
-        // Defensive check (even though it "shouldn't" happen)
+        // Defensive check (even though it "shouldn't" happen aka follows JPA contract)
         if (savedBook == null) {
             throw new IllegalStateException("Failed to save book - repository returned null");
         }
