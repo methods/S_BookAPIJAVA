@@ -7,6 +7,7 @@ import com.codesungrape.hmcts.BookAPI.service.BookService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -14,6 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.Assert;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.Arguments;
+import java.util.stream.Stream;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -165,37 +169,11 @@ class BookServiceTest {
 
     // ----- EDGE cases ---------
 
-    @ParameterizedTest
-    @CsvSource({
-            "500, title, 'A very long title test'",
-            "1000, synopsis, 'A very long synopsis test'"
-    })
-    void testCreateBook_VeryLongFields_Success(int repeatCount, String fieldType, String description) {
+    @ParameterizedTest(name= "{0}") // Display the test name
+    @MethodSource("provideLongFieldTestCases")
+    void testCreateBook_VeryLongFields_Success(String testName, BookRequest request, Book expectedBook) {
 
         // Arrange
-        String longText = "A".repeat(repeatCount);
-
-        BookRequest request;
-        Book expectedBook;
-
-        if (fieldType.equals("title")) {
-            request = new BookRequest(longText, "Synopsis", "Author");
-            expectedBook = Book.builder()
-                    .id(testId)
-                    .title(longText)
-                    .synopsis("Synopsis")
-                    .author("Author")
-                    .build();
-        } else {
-            request = new BookRequest("Title", longText, "Author");
-            expectedBook = Book.builder()
-                    .id(testId)
-                    .title("Title")
-                    .synopsis(longText)
-                    .author("Author")
-                    .build();
-        }
-
         when(testBookRepository.save(any(Book.class)))
                 .thenReturn(expectedBook);
 
@@ -204,16 +182,94 @@ class BookServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(testId, result.getId());
-
-        if (fieldType.equals("title")) {
-            assertEquals(longText, result.getTitle());
-        } else {
-            assertEquals(longText, result.getSynopsis());
-        }
+        assertEquals(expectedBook.getId(), result.getId());
+        assertEquals(expectedBook.getTitle(), result.getTitle());
+        assertEquals(expectedBook.getSynopsis(), result.getSynopsis());
+        assertEquals(expectedBook.getAuthor(), result.getAuthor());
 
         verify(testBookRepository, times(1)).save(any(Book.class));
     }
+
+    // Provide test data, static method: can be called without creating an object.
+    private static Stream<Arguments> provideLongFieldTestCases() {
+        UUID testId = UUID.randomUUID();
+
+        String longTitle = "A".repeat(500);
+        String longSynopsis = "A".repeat(1000);
+
+        return Stream.of(
+                Arguments.of(
+                    "Very long title (500 chars)",
+                    new BookRequest(longTitle, "Synopsis", "Author"),
+                    Book.builder()
+                            .id(testId)
+                            .title(longTitle)
+                            .synopsis("Synopsis")
+                            .author("Author")
+                            .build()
+                ),
+                Arguments.of(
+                    "Very long synopsis (1000 chars)",
+                    new BookRequest("Title", longSynopsis, "Author"),
+                    Book.builder()
+                            .id(testId)
+                            .title("Title")
+                            .synopsis(longSynopsis)
+                            .author("Author")
+                            .build()
+                )
+        );
+    }
+
+//    @ParameterizedTest
+//    @CsvSource({
+//            "500, title, 'A very long title test'",
+//            "1000, synopsis, 'A very long synopsis test'"
+//    })
+//    void testCreateBook_VeryLongFields_Success(int repeatCount, String fieldType, String description) {
+//
+//        // Arrange
+//        String longText = "A".repeat(repeatCount);
+//
+//        BookRequest request;
+//        Book expectedBook;
+//
+//        if (fieldType.equals("title")) {
+//            request = new BookRequest(longText, "Synopsis", "Author");
+//            expectedBook = Book.builder()
+//                    .id(testId)
+//                    .title(longText)
+//                    .synopsis("Synopsis")
+//                    .author("Author")
+//                    .build();
+//        } else {
+//            request = new BookRequest("Title", longText, "Author");
+//            expectedBook = Book.builder()
+//                    .id(testId)
+//                    .title("Title")
+//                    .synopsis(longText)
+//                    .author("Author")
+//                    .build();
+//        }
+//
+//        when(testBookRepository.save(any(Book.class)))
+//                .thenReturn(expectedBook);
+//
+//        // Act
+//        Book result = testBookService.createBook(request);
+//
+//        // Assert
+//        assertNotNull(result);
+//        assertEquals(testId, result.getId());
+//
+//        if (fieldType.equals("title")) {
+//            assertEquals(longText, result.getTitle());
+//        } else {
+//            assertEquals(longText, result.getSynopsis());
+//        }
+//
+//        verify(testBookRepository, times(1)).save(any(Book.class));
+//    }
 
 //    @Test
 //    void testCreateBook_VeryLongTitle_Success() {
