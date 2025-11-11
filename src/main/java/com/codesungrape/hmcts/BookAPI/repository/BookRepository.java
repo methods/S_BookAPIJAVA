@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * Spring Data JPA automatically provides CRUD operations based on the Entity and ID type.
  */
 @Repository
-public interface BookRepository extends JpaRepository<Book, UUID> { // same error msg here: Missing package statement: 'com.codesungrape.hmcts.BookAPI.repository'
+public interface BookRepository extends JpaRepository<Book, UUID> {
 
     // Custom query to find books that have NOT been soft-deleted
     List<Book> findAllByDeletedFalse();

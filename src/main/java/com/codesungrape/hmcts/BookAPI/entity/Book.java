@@ -14,7 +14,7 @@ import lombok.*;
  * @Getter: Automatically generates getters for all fields.
  * @Setter: Automatically generates setters.
  * @AllArgsConstructor: Generates a no-argument constructor (required by JPA).
- *                      JPA needs to instantiate the enity using reflection. 'PROTECTED' prevents misuse.
+ *                      JPA needs to instantiate the entity using reflection. 'PROTECTED' prevents misuse.
  * @Builder: Adds a builder pattern for clean object creation.
 *            You can do Book.builder().title("A").author("B").build();
  */
@@ -29,7 +29,7 @@ public class Book {
 
     @Id // Primary key of the table
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", nullable = false) // maps the field to a database column names 'id' + 'nullable =false' database column cannot be NULL.
+    @Column(name = "id", nullable = false) // maps the field to a database column named 'id' + 'nullable =false' database column cannot be NULL.
     private UUID id;
 
     @Column(name = "title", nullable = false)
@@ -43,16 +43,23 @@ public class Book {
 
     // Soft delete - makes DELETE operations idempotent (safe to repeat)
     @Column(name = "deleted", nullable = false)
+    @Builder.Default
     private boolean deleted = false;
 
     @Column(name = "created_at", nullable = false)
-    private java.time.Instant createdAt = java.time.Instant.now();
+    private java.time.Instant createdAt;
 
     @Column(name = "modified_at")
     private java.time.Instant modifiedAt;
 
     // --- Business Logic Helper ---
     // HMCTS mandates business logic in services, but a setter hook is acceptable.
+    // Lifecycle callback - special method runs automatically before Hibernate persists a record in the database.
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = java.time.Instant.now();
+    }
+
     // Lifecycle callback - special method runs automatically before Hibernate updates a record in the database.
     @PreUpdate
     protected void onUpdate() {

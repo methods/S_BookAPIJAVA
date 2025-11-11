@@ -13,7 +13,7 @@ import lombok.Value;
  */
 @Value
 public class BookRequest {
-    @NotBlank(message= "Title is required") // enforces
+    @NotBlank(message= "Title is required") // enforces non-empty title requirement
     @JsonProperty("title")
     String title;
 
