@@ -3,6 +3,7 @@ package com.codesungrape.hmcts.BookAPI.entity;
 import jakarta.persistence.*;
 import java.util.UUID;
 import lombok.*;
+import java.time.Instant;
 
 /**
  * JPA Entity representing the Book table in PostgreSQL.
@@ -14,7 +15,7 @@ import lombok.*;
  * @Getter: Automatically generates getters for all fields.
  * @Setter: Automatically generates setters.
  * @AllArgsConstructor: Generates a no-argument constructor (required by JPA).
- *                      JPA needs to instantiate the enity using reflection. 'PROTECTED' prevents misuse.
+ *                      JPA needs to instantiate the entity using reflection. 'PROTECTED' prevents misuse.
  * @Builder: Adds a builder pattern for clean object creation.
 *            You can do Book.builder().title("A").author("B").build();
  */
@@ -29,7 +30,7 @@ public class Book {
 
     @Id // Primary key of the table
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", nullable = false) // maps the field to a database column names 'id' + 'nullable =false' database column cannot be NULL.
+    @Column(name = "id", nullable = false) // maps the field to a database column named 'id' + 'nullable =false' database column cannot be NULL.
     private UUID id;
 
     @Column(name = "title", nullable = false)
@@ -42,20 +43,32 @@ public class Book {
     private String author;
 
     // Soft delete - makes DELETE operations idempotent (safe to repeat)
+    // Soft delete - using @Builder.Default to ensure the builder
+    // respects this initialization if the field is not set explicitly.
     @Column(name = "deleted", nullable = false)
+    @Builder.Default
     private boolean deleted = false;
 
-    @Column(name = "created_at", nullable = false)
-    private java.time.Instant createdAt = java.time.Instant.now();
+    // `createdAt` is null upon object creation.
+    // It will be set by the `onCreate()` method right before persistence.
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
     @Column(name = "modified_at")
     private java.time.Instant modifiedAt;
+
+    // --- JPA lifecycle callbacks ---
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = java.time.Instant.now();
+    }
 
     // --- Business Logic Helper ---
     // HMCTS mandates business logic in services, but a setter hook is acceptable.
     // Lifecycle callback - special method runs automatically before Hibernate updates a record in the database.
     @PreUpdate
     protected void onUpdate() {
+
         this.modifiedAt = java.time.Instant.now();
     }
 
