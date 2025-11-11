@@ -24,12 +24,20 @@ public class BookService {
             throw new NullPointerException("BookRequest cannot be null");
         }
 
+
+        // REVISIT: Leaving this here for now as i haven't implemented the Controller Layer yet
+        // The service layer is duplicating validation that already exists in the
+        // BookRequest DTO with @notblank annotations. Since the DTO has validation
+        // constraints, this manual check is redundant when Spring's validation
+        // framework is properly configured in the controller layer.
+        // Consider removing this duplication or adding a comment explaining
+        // why service-level validation is necessary in addition to DTO validation.
         if (request.getTitle() == null || request.getTitle().isBlank()) {
             throw new IllegalArgumentException("Book title cannot be null or blank");
         }
 
         // Map DTO to Entity
-        Book newBook = Book.builder() //Cannot resolve method 'builder' in 'Book'
+        Book newBook = Book.builder()
                 .title(request.getTitle())
                 .author(request.getAuthor())
                 .synopsis(request.getSynopsis())
