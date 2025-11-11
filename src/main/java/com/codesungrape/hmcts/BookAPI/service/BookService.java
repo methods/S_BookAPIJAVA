@@ -24,12 +24,8 @@ public class BookService {
             throw new NullPointerException("BookRequest cannot be null");
         }
 
-        if (request.getTitle() == null || request.getTitle().isBlank()) {
-            throw new IllegalArgumentException("Book title cannot be null or blank");
-        }
-
         // Map DTO to Entity
-        Book newBook = Book.builder() //Cannot resolve method 'builder' in 'Book'
+        Book newBook = Book.builder()
                 .title(request.getTitle())
                 .author(request.getAuthor())
                 .synopsis(request.getSynopsis())
