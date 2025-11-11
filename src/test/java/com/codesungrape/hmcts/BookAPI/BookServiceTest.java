@@ -10,16 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.Assert;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.Arguments;
 import java.util.stream.Stream;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -171,7 +166,11 @@ class BookServiceTest {
 
     @ParameterizedTest(name= "{0}") // Display the test name
     @MethodSource("provideLongFieldTestCases")
-    void testCreateBook_VeryLongFields_Success(String testName, BookRequest request, Book expectedBook) {
+    void testCreateBook_VeryLongFields_Success(
+            String testName,
+            BookRequest request,
+            Book expectedBook
+        ) {
 
         // Arrange
         when(testBookRepository.save(any(Book.class)))

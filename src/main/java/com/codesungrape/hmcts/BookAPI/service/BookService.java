@@ -6,9 +6,6 @@ import org.springframework.stereotype.Service; // Marks a class as a Service Lay
 import lombok.RequiredArgsConstructor;
 
 import com.codesungrape.hmcts.BookAPI.entity.Book;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Service layer responsible for all business logic related to the Book resource.
@@ -22,7 +19,7 @@ public class BookService {
 
     // 1. CREATE Operation (POST /books)
     public Book createBook(BookRequest request) {
-        // Validation check for business rules (e.g., uniqueness, if required) would go here
+        // Validation check for business rules (e.g., uniqueness, if required)
         if (request == null) {
             throw new NullPointerException("BookRequest cannot be null");
         }
