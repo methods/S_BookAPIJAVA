@@ -101,6 +101,13 @@ class BookServiceTest {
         });
     }
 
+    // CoPilot feedback:
+    //This test will fail because BookRequest uses @value from Lombok with @notblank validation.
+    //The @notblank constraint on the title field means that creating a BookRequest with a null
+    // title should trigger validation failure at the DTO level, not allow the object to be
+    // created. Either the test expectations are incorrect, or the DTO validation is not being
+    // applied. The same issue affects tests on lines 105-116, 119-127, and 130-138.
+
     @Test
     void testCreateBook_NullTitle_ThrowsException() {
         // Arrange
