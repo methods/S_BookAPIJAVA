@@ -11,10 +11,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BookApiApplication {
 
     /**
-     * Placeholder.
+     * Private constructor to prevent instantiation.
+     * This avoids Checkstyle treating this as an instantiable utility class.
      */
     private BookApiApplication() {
-        // prevents instantiation
+        // Intentionally empty — prevents accidental instantiation
     }
 
     /**
