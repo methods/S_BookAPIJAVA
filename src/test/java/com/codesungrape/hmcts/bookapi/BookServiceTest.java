@@ -1,9 +1,9 @@
-package com.codesungrape.hmcts.BookAPI;
+package com.codesungrape.hmcts.bookapi;
 
-import com.codesungrape.hmcts.BookAPI.dto.BookRequest;
-import com.codesungrape.hmcts.BookAPI.entity.Book;
-import com.codesungrape.hmcts.BookAPI.repository.BookRepository;
-import com.codesungrape.hmcts.BookAPI.service.BookService;
+import com.codesungrape.hmcts.bookapi.dto.BookRequest;
+import com.codesungrape.hmcts.bookapi.entity.Book;
+import com.codesungrape.hmcts.bookapi.repository.BookRepository;
+import com.codesungrape.hmcts.bookapi.service.BookService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

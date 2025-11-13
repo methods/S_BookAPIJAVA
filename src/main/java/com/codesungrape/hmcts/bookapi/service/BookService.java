@@ -1,11 +1,11 @@
-package com.codesungrape.hmcts.BookAPI.service;
+package com.codesungrape.hmcts.bookapi.service;
 
-import com.codesungrape.hmcts.BookAPI.dto.BookRequest;
-import com.codesungrape.hmcts.BookAPI.repository.BookRepository;
+import com.codesungrape.hmcts.bookapi.dto.BookRequest;
+import com.codesungrape.hmcts.bookapi.repository.BookRepository;
 import org.springframework.stereotype.Service; // Marks a class as a Service Layer component.
 import lombok.RequiredArgsConstructor;
 
-import com.codesungrape.hmcts.BookAPI.entity.Book;
+import com.codesungrape.hmcts.bookapi.entity.Book;
 
 /**
  * Service layer responsible for all business logic related to the Book resource.

@@ -1,4 +1,4 @@
-package com.codesungrape.hmcts.BookAPI.entity;
+package com.codesungrape.hmcts.bookapi.entity;
 
 import jakarta.persistence.*;
 import java.util.UUID;

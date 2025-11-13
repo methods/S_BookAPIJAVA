@@ -1,10 +1,10 @@
-package com.codesungrape.hmcts.BookAPI.repository;
+package com.codesungrape.hmcts.bookapi.repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.codesungrape.hmcts.BookAPI.entity.Book;
+import com.codesungrape.hmcts.bookapi.entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +19,6 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
     List<Book> findAllByDeletedFalse();
 
     // Custom query to find a specific, non-deleted book by ID.
-    Optional<Book> findByIdAndDeleteFalse(UUID id);
+    Optional<Book> findByIdAndDeletedFalse(UUID id);
 
 }

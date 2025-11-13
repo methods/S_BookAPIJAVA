@@ -2,6 +2,12 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.7'
 	id 'io.spring.dependency-management' version '1.1.7'
+
+    // --- Quality Tooling ---
+    id 'jacoco' // Code coverage
+    id 'checkstyle' // Style rule enforcement
+    id 'com.github.spotbugs' version '6.0.7' // Static analysis for bugs
+    id 'com.diffplug.spotless' version '6.25.0' // Code formatting
 }
 
 group = 'com.codesungrape.hmcts'
@@ -9,9 +15,11 @@ version = '0.0.1-SNAPSHOT'
 description = 'Demo project for Spring Boot'
 
 java {
+    // Toolchain is the modern way to define JDK version.
+    // It automatically handles source/target compatibility.
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 configurations {
@@ -31,11 +39,108 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'com.h2database:h2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params'
 }
 
+// ===== TESTING & COVERAGE CONFIGURATION =====
+
 tasks.named('test') {
 	useJUnitPlatform()
+    finalizedBy jacocoTestReport // Always generate report after tests
+
+    // Add this for better test output
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+}
+
+// Configure JaCoCo
+jacoco {
+    toolVersion = '0.8.11'
+}
+
+// Generate coverage reports
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true  // For CI systems like SonarQube/Codecov
+        html.required = true // For human-readable reports
+        csv.required = false
+    }
+}
+
+// ENFORCE 100% coverage with branch coverage
+jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+
+    violationRules {
+        rule {
+            element = 'CLASS'
+
+            // Exclude common classes that don't need testing
+            excludes = [
+                    '**.*Application',              // Spring Boot main class
+                    '**.*ApplicationTests',         // Test classes
+                    '**.*Config',                   // Configuration classes
+                    '**.*Configuration',            // Alternative config naming
+                    '**.config.*',                  // Config package
+                    '**.dto.*',                     // DTOs
+                    '**.entity.*',                  // JPA entities
+                    '**.model.*',                   // Models (if used)
+                    '**.*Constants',                // Constant classes
+                    '**.*Exception'                 // Custom exceptions (optional)
+            ]
+            limit {
+                counter = 'INSTRUCTION'
+                value = 'COVEREDRATIO'
+                minimum = 1.00 // 100% instruction coverage
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 1.00 // 100% branch coverage (if/else, switch, etc.)
+            }
+        }
+    }
+}
+
+// ===== CODE QUALITY & STYLE CONFIGURATION =====
+
+spotless {
+    java {
+        googleJavaFormat('1.17.0').aosp() // A popular, opinionated style
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+checkstyle {
+    toolVersion = '12.1.2'
+    maxWarnings = 0 // Fail build on any warning
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+}
+
+spotbugs {
+    // Recommended to use a more recent tool version
+    toolVersion = '4.8.3'
+    // Fail the build on any identified issue
+    ignoreFailures = false
+}
+
+
+// ===== BUILD LIFECYCLE INTEGRATION =====
+// The standard 'check' task will now run all quality gates
+
+tasks.named('check') {
+    dependsOn jacocoTestCoverageVerification
+    dependsOn tasks.named('spotlessCheck')
+    dependsOn tasks.named('checkstyleMain')
+    dependsOn tasks.named('spotbugsMain')
 }
