@@ -1,9 +1,13 @@
 HELP.md
 .gradle
 build/
+**/build/
+*.class
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+bin/main/application.yaml
+**/target
 
 
 ### STS ###
@@ -26,6 +30,12 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+.mirrord
+.DS_Store
+
+# node_modules
+package-lock.json
+node_modules/
 
 ### NetBeans ###
 /nbproject/private/
@@ -54,3 +64,4 @@ out/
 
 # Environment variables
 .env
+

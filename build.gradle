@@ -7,7 +7,6 @@ plugins {
     id 'jacoco' // Code coverage
     id 'checkstyle' // Style rule enforcement
     id 'com.github.spotbugs' version '6.0.7' // Static analysis for bugs
-    id 'com.diffplug.spotless' version '6.25.0' // Code formatting
 }
 
 group = 'com.codesungrape.hmcts'
@@ -112,19 +111,10 @@ jacocoTestCoverageVerification {
 
 // ===== CODE QUALITY & STYLE CONFIGURATION =====
 
-spotless {
-    java {
-        googleJavaFormat('1.17.0').aosp() // A popular, opinionated style
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-}
-
 checkstyle {
-    toolVersion = '12.1.2'
-    maxWarnings = 0 // Fail build on any warning
-    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    maxWarnings = 0
+    toolVersion = '10.26.1'
+    getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
 spotbugs {
