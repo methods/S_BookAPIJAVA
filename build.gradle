@@ -124,13 +124,19 @@ spotbugs {
     ignoreFailures = false
 }
 
+// Aggregate SpotBugs task
+tasks.register("spotbugs") {
+  group = "verification"
+  description = "Run all SpotBugs analysis tasks"
+  dependsOn("spotbugsMain", "spotbugsTest")
+}
 
 // ===== BUILD LIFECYCLE INTEGRATION =====
 // The standard 'check' task will now run all quality gates
 
 tasks.named('check') {
     dependsOn jacocoTestCoverageVerification
-    dependsOn tasks.named('spotlessCheck')
     dependsOn tasks.named('checkstyleMain')
-    dependsOn tasks.named('spotbugsMain')
+    dependsOn tasks.named('checkstyleTest')
+    dependsOn tasks.named('spotbugs')
 }
