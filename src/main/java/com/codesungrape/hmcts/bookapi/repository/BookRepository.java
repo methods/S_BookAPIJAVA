@@ -1,24 +1,28 @@
 package com.codesungrape.hmcts.bookapi.repository;
 
+import com.codesungrape.hmcts.bookapi.entity.Book;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import com.codesungrape.hmcts.bookapi.entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository interface for Book Entity.
- * Spring Data JPA automatically provides CRUD operations based on the Entity and ID type.
+ * Repository interface for Book entities.
+ * Provides CRUD operations and custom queries for non-deleted books.
+ * Spring Data JPA automatically implements this interface at runtime.
  */
 @Repository
 public interface BookRepository extends JpaRepository<Book, UUID> {
 
-    // Custom query to find books that have NOT been soft-deleted
-    List<Book> findAllByDeletedFalse();
+  /**
+   * Custom query retrieves all Book records that have not been soft-deleted.
+   */
+  List<Book> findAllByDeletedFalse();
 
-    // Custom query to find a specific, non-deleted book by ID.
-    Optional<Book> findByIdAndDeletedFalse(UUID id);
+  /**
+   * Retrieves a single Book by ID, if it exists and has not been soft-deleted.
+   */
+  Optional<Book> findByIdAndDeletedFalse(UUID id);
 
 }
