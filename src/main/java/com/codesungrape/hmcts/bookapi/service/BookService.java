@@ -23,7 +23,6 @@ public class BookService {
      * @return The saved Book entity
      * @throws NullPointerException     if request is null
      * @throws IllegalArgumentException if title is null or blank
-     * @throws IllegalStateException    if the repository fails to save the book
      */
     public Book createBook(BookRequest request) {
         // Validation check for business rules (e.g., uniqueness, if required)

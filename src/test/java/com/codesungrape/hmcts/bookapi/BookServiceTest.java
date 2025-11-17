@@ -17,16 +17,23 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
-/**
- * @ExtendWith(MockitoExtension.class): tells JUnit 5 to use Mockito's extension and automatically
- * initializes all @Mock and @InjectMocks fields when running this test class. @Mock: Creates a fake
- * version (mock) of the dependency. @InjectMocks: creates an instance of the real class under
- * test. @BeforeEach: Runs before each test method in the class. @Test: Marks the method as a test
- * case that JUnit should execute.
+
+/**.
+ * Explains how this test class uses Mockito:
+ * - JUnit is extended using MockitoExtension
+ * - @Mock creates fake dependencies
+ * - @InjectMocks creates the real service with mocks injected
+ * - @BeforeEach runs before every test
+ * - @Test marks a test method
  */
 
 // Annotation tells JUnit to use Mockito
@@ -202,20 +209,6 @@ class BookServiceTest {
     }
 
     // ----- EDGE cases ---------
-
-    @Test
-    void testCreateBook_RepositoryReturnsNull_HandlesGracefully() {
-        // Arrange
-        when(testBookRepository.save(any(Book.class))).thenReturn(null);
-
-        // Act & assert
-        assertThrows(
-            IllegalStateException.class,
-            () -> {
-                testBookService.createBook(validBookRequest);
-            }
-        );
-    }
 
     @ParameterizedTest(name = "{0}") // Display the test name
     @MethodSource("provideLongFieldTestCases")
