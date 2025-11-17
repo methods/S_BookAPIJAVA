@@ -22,10 +22,11 @@ Checkstyle uses the HMCTS `checkstyle.xml`, enforcing naming, formatting, Javado
 
 ### Run Checkstyle
 
-`./gradlew checkstyleMain
-./gradlew checkstyleTest`
+`./gradlew checkstyleMain`
+or
+`./gradlew checkstyleTest`
 
-### Run all Checkstyle tasks
+### Run ALL Checkstyle tasks
 
 `./gradlew checkstyle`
 
@@ -123,7 +124,6 @@ This runs:
 ### Gradle Daemon: Stop the Daemon and Force a Clean Run
 
 **Step 1: Forcefully stop all running Gradle daemons.**
-Forcefully stop all running Gradle daemons.
 This command tells Gradle to find any background processes it has running and terminate them.
 ```Bash
 ./gradlew --stop
@@ -132,7 +132,7 @@ This command tells Gradle to find any background processes it has running and te
 **Step 2: Run a clean build.**
 The clean task deletes the entire build directory. This removes any old, compiled artifacts and cached results, ensuring nothing stale is left over. We will combine it with the checkstyleMain task.
 ```Bash
-./gradlew clean <checkstyleMain>
+./gradlew clean [checkstyleMain]
 ```
 
 ----------
