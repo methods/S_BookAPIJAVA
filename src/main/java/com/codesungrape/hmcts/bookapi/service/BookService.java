@@ -4,6 +4,7 @@ import com.codesungrape.hmcts.bookapi.dto.BookRequest;
 import com.codesungrape.hmcts.bookapi.entity.Book;
 import com.codesungrape.hmcts.bookapi.exception.ResourceNotFoundException;
 import com.codesungrape.hmcts.bookapi.repository.BookRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,13 +28,14 @@ public class BookService {
      * @throws NullPointerException     if request is null
      * @throws IllegalArgumentException if title is null or blank
      */
+    @Transactional // Required: This method modifies data
     public Book createBook(BookRequest request) {
         // Validation check for business rules (e.g., uniqueness, if required)
         if (request == null) {
             throw new NullPointerException("BookRequest cannot be null");
         }
 
-        // TODO: Leaving this here for now as i haven't implemented the Controller Layer yet
+        // TODO: Remove manual validation once Controller validation (@Valid) is implemented.
         // The service layer is duplicating validation that already exists in the
         // BookRequest DTO with @notblank annotations. Since the DTO has validation
         // constraints, this manual check is redundant when Spring's validation
@@ -59,6 +61,7 @@ public class BookService {
     }
 
     // Soft Delete
+    @Transactional // Required: This method modifies data
     public void deleteBookById(UUID bookId) {
 
         // find the book only if it's not already soft-deleted
