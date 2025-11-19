@@ -72,6 +72,16 @@ jacocoTestReport {
         html.required = true // For human-readable reports
         csv.required = false
     }
+
+    doLast {
+      // We extract the file path into a variable
+      def reportFile = reports.html.entryPoint
+
+      println "\n========================================================="
+      // Wrap the path in quotes to handle the space in "BookAPI 2" better
+      println "JaCoCo Report: file://${reportFile}"
+      println "=========================================================\n"
+    }
 }
 
 // ENFORCE 100% coverage with branch coverage
