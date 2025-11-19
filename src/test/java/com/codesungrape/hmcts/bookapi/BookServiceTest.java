@@ -319,4 +319,20 @@ class BookServiceTest {
         verify(testBookRepository, times(1)).findById(testId);
         verify(testBookRepository, times(1)).save(persistedBook);
     }
+
+    @Test
+    void testDeleteBookById_ShouldDoNothing_WhenAlreadyDeleted() {
+
+        // Arrange:
+        persistedBook.setDeleted(true); // ensure starting state
+        when(testBookRepository.findById(testId))
+            .thenReturn(Optional.of(persistedBook));
+
+        // Act: call the service method we are testing
+        testBookService.deleteBookById(testId);
+
+        // Assert
+        // Verify save was NEVER called (it entered the 'false' branch of if)
+        verify(testBookRepository, never()).save(any(Book.class));
+    }
 }
