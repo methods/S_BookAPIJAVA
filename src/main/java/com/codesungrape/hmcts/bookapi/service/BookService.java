@@ -60,13 +60,20 @@ public class BookService {
         return savedBook;
     }
 
-    // Soft Delete
+    /**
+     * Performs a soft delete on a Book entity by marking it as deleted.
+     * This operation is idempotent - repeated calls will not trigger additional database writes.
+     *
+     * @param bookId The UUID of the book to soft delete
+     * @throws ResourceNotFoundException if no book exists with the given ID
+     */
     @Transactional // Required: This method modifies data
     public void deleteBookById(UUID bookId) {
 
-        // find the book only if it's not already soft-deleted
         Book book = bookRepository.findById(bookId)
-            .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
+            .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                "Book not found with id: %s", bookId
+            )));
 
         // Idempotent way to mark soft-delete and save
         if (!book.isDeleted()) {

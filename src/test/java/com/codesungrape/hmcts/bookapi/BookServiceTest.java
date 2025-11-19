@@ -325,7 +325,7 @@ class BookServiceTest {
         testBookService.deleteBookById(testId);
 
         // Assert
-        // Verify save was NEVER called (it entered the 'false' branch of if)
+        // Verify save was NEVER called (the if condition was false, so the if block was skipped)
         verify(testBookRepository, never()).save(any(Book.class));
     }
 }
