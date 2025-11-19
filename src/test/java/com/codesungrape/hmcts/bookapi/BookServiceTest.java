@@ -283,7 +283,7 @@ class BookServiceTest {
 
         // Arrange: As goal is to test what happens when the resource doesn't exist,
         // we intentionally simulate DB returning NO result
-        when(testBookRepository.findByIdAndDeletedFalse(testId)).thenReturn(Optional.empty());
+        when(testBookRepository.findById(testId)).thenReturn(Optional.empty());
 
         // ACT and ASSERT: throw ResourceNotFoundException when calling the delete method.
         assertThrows(
@@ -303,7 +303,7 @@ class BookServiceTest {
         // Arrange:
         persistedBook.setDeleted(false); // ensure starting state
 
-        when(testBookRepository.findByIdAndDeletedFalse(testId))
+        when(testBookRepository.findById(testId))
             .thenReturn(Optional.of(persistedBook));
 
         when(testBookRepository.save(any(Book.class)))
@@ -316,7 +316,7 @@ class BookServiceTest {
         assertTrue(persistedBook.isDeleted());
 
         // Assert: repository methods were called correctly
-        verify(testBookRepository, times(1)).findByIdAndDeletedFalse(testId);
+        verify(testBookRepository, times(1)).findById(testId);
         verify(testBookRepository, times(1)).save(persistedBook);
     }
 }

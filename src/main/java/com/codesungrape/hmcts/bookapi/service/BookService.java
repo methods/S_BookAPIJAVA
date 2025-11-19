@@ -2,9 +2,12 @@ package com.codesungrape.hmcts.bookapi.service;
 
 import com.codesungrape.hmcts.bookapi.dto.BookRequest;
 import com.codesungrape.hmcts.bookapi.entity.Book;
+import com.codesungrape.hmcts.bookapi.exception.ResourceNotFoundException;
 import com.codesungrape.hmcts.bookapi.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 /**
  * Service layer responsible for all business logic related to the Book resource.
@@ -13,7 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor // Lombok creates constructor for dependency injection
 public class BookService {
 
-    // Create a field to store the repo
+    // Create a field to store the repo in this scope to be accessed and used/reused by methods below
     private final BookRepository bookRepository;
 
     /**
@@ -53,5 +56,19 @@ public class BookService {
         Book savedBook = bookRepository.save(newBook);
 
         return savedBook;
+    }
+
+    // Soft Delete
+    public void deleteBookById(UUID bookId) {
+
+        // find the book only if it's not already soft-deleted
+        Book book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
+
+        // Idempotent way to mark soft-delete and save
+        if (!book.isDeleted()) {
+            book.setDeleted(true);
+            bookRepository.save(book);
+        }
     }
 }
