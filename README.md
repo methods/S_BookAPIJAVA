@@ -74,7 +74,7 @@ JaCoCo generates unit test and integration test coverage reports in XML and HTML
 
 ### Coverage report location
 
-`build/reports/jacoco/test/jacocoTestReport.html`
+`build/reports/jacoco/test/html/index.html`
 
 ----------
 

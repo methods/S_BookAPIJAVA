@@ -2,9 +2,13 @@ package com.codesungrape.hmcts.bookapi.service;
 
 import com.codesungrape.hmcts.bookapi.dto.BookRequest;
 import com.codesungrape.hmcts.bookapi.entity.Book;
+import com.codesungrape.hmcts.bookapi.exception.ResourceNotFoundException;
 import com.codesungrape.hmcts.bookapi.repository.BookRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 /**
  * Service layer responsible for all business logic related to the Book resource.
@@ -13,7 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor // Lombok creates constructor for dependency injection
 public class BookService {
 
-    // Create a field to store the repo
+    // Create a field to store the repo in this scope to be accessed and used/reused by methods below
     private final BookRepository bookRepository;
 
     /**
@@ -24,13 +28,14 @@ public class BookService {
      * @throws NullPointerException     if request is null
      * @throws IllegalArgumentException if title is null or blank
      */
+    @Transactional // Required: This method modifies data
     public Book createBook(BookRequest request) {
         // Validation check for business rules (e.g., uniqueness, if required)
         if (request == null) {
             throw new NullPointerException("BookRequest cannot be null");
         }
 
-        // TODO: Leaving this here for now as i haven't implemented the Controller Layer yet
+        // TODO: Remove manual validation once Controller validation (@Valid) is implemented.
         // The service layer is duplicating validation that already exists in the
         // BookRequest DTO with @notblank annotations. Since the DTO has validation
         // constraints, this manual check is redundant when Spring's validation
@@ -53,5 +58,27 @@ public class BookService {
         Book savedBook = bookRepository.save(newBook);
 
         return savedBook;
+    }
+
+    /**
+     * Performs a soft delete on a Book entity by marking it as deleted.
+     * This operation is idempotent - repeated calls will not trigger additional database writes.
+     *
+     * @param bookId The UUID of the book to soft delete
+     * @throws ResourceNotFoundException if no book exists with the given ID
+     */
+    @Transactional // Required: This method modifies data
+    public void deleteBookById(UUID bookId) {
+
+        Book book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                "Book not found with id: %s", bookId
+            )));
+
+        // Idempotent way to mark soft-delete and save
+        if (!book.isDeleted()) {
+            book.setDeleted(true);
+            bookRepository.save(book);
+        }
     }
 }
