@@ -209,7 +209,6 @@ class BookServiceTest {
         BookRequest request,
         Book expectedBook
     ) {
-
         // Arrange
         when(testBookRepository.save(any(Book.class))).thenReturn(expectedBook);
 
@@ -218,10 +217,6 @@ class BookServiceTest {
 
         // Assert 1: Verify the result flow
         assertEquals(expectedBook, result);
-        assertEquals(expectedBook.getId(), result.getId());
-        assertEquals(expectedBook.getTitle(), result.getTitle());
-        assertEquals(expectedBook.getSynopsis(), result.getSynopsis());
-        assertEquals(expectedBook.getAuthor(), result.getAuthor());
 
         // --- CAPTOR LOGIC ---
         ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
@@ -271,7 +266,7 @@ class BookServiceTest {
         ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
         verify(testBookRepository, times(1)).save(bookCaptor.capture());
 
-        // extract from captured object (internal list)
+        // extract from the captured object (internal list)
         Book savedBook = bookCaptor.getValue();
 
         // Assert: the service correctly marked it as deleted
