@@ -122,25 +122,43 @@ class BookServiceTest {
     // --------------------------------------
     // Tests: createBook
     // --------------------------------------
+
     @Test
     void testCreateBook_Success() {
+        // Arrange: also checks special chars
+        BookRequest specialRequest =
+            new BookRequest("Java & Friends!", "Synopsis", "Author");
 
-        // Arrange: tell the mock repository what to do when called
-        when(testBookRepository.save(any(Book.class))).thenReturn(persistedBook);
+        Book expectedBook =
+            Book.builder()
+                .id(testId)
+                .title(specialRequest.title())
+                .synopsis(specialRequest.synopsis())
+                .author(specialRequest.author())
+                .build();
 
-        // Act: call the service method we are testing
-        Book result = testBookService.createBook(validBookRequest);
+        when(testBookRepository.save(any(Book.class))).thenReturn(expectedBook);
 
-        // Assert: Check the outcome
-        assertNotNull(result);
-        assertEquals(testId, result.getId());
-        assertEquals(validBookRequest.title(), result.getTitle());
-        assertEquals(validBookRequest.synopsis(), result.getSynopsis());
-        assertEquals(validBookRequest.author(), result.getAuthor());
+        // Act
+        Book result = testBookService.createBook(specialRequest);
 
-        // Did the service perform the correct action on its dependency?
-        verify(testBookRepository, times(1)).save(any(Book.class));
+        // Assert: capture the Book passed to save()
+        ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
+        verify(testBookRepository, times(1)).save(bookCaptor.capture());
+        Book savedBook = bookCaptor.getValue();
+
+        // Assert
+        assertNotNull(savedBook);
+        assertNull(savedBook.getId(), "ID should be null before DB generates it");
+        assertEquals(specialRequest.title(), savedBook.getTitle());
+        assertEquals(specialRequest.synopsis(), savedBook.getSynopsis());
+        assertEquals(specialRequest.author(), savedBook.getAuthor());
+
+        // Assert: Verify the Service fulfills its return contract
+        assertEquals(expectedBook, result, "Service must return the object returned by the repository");
+
     }
+
 
     @Test
     void testCreateBook_NullRequest_ThrowsException() {
@@ -237,42 +255,6 @@ class BookServiceTest {
         assertEquals(expectedBook.getAuthor(), result.getAuthor());
 
         verify(testBookRepository, times(1)).save(any(Book.class));
-    }
-
-    @Test
-    void testCreateBook_SpecialCharactersInTitle_Success() {
-        // Arrange
-        BookRequest specialRequest =
-            new BookRequest("Test: A Book! @#$%^&*()", "Synopsis", "Author");
-
-        Book expectedBook =
-            Book.builder()
-                .id(testId)
-                .title(specialRequest.title())
-                .synopsis(specialRequest.synopsis())
-                .author(specialRequest.author())
-                .build();
-
-        when(testBookRepository.save(any(Book.class))).thenReturn(expectedBook);
-
-        // Act
-        Book result = testBookService.createBook(specialRequest);
-
-        // Assert: capture the Book passed to save()
-        ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
-        verify(testBookRepository, times(1)).save(bookCaptor.capture());
-        Book savedBook = bookCaptor.getValue();
-
-        // Assert
-        assertNotNull(savedBook);
-        assertNull(savedBook.getId(), "ID should be null before DB generates it");
-        assertEquals(specialRequest.title(), savedBook.getTitle());
-        assertEquals(specialRequest.synopsis(), savedBook.getSynopsis());
-        assertEquals(specialRequest.author(), savedBook.getAuthor());
-
-        // Assert: Verify the Service fulfills its return contract
-        assertEquals(expectedBook, result, "Service must return the object returned by the repository");
-
     }
 
     // --------------------------------------------------------------------------------------------
