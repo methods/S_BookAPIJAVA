@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +22,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -256,15 +258,21 @@ class BookServiceTest {
         // Act
         Book result = testBookService.createBook(specialRequest);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(testId, result.getId());
-        assertEquals(specialRequest.title(), result.getTitle());
-        assertEquals(specialRequest.synopsis(), result.getSynopsis());
-        assertEquals(specialRequest.author(), result.getAuthor());
+        // Assert: capture the Book passed to save()
+        ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
+        verify(testBookRepository, times(1)).save(bookCaptor.capture());
+        Book savedBook = bookCaptor.getValue();
 
-        // Did the service perform the correct action on its dependency?
-        verify(testBookRepository, times(1)).save(any(Book.class));
+        // Assert
+        assertNotNull(savedBook);
+        assertNull(savedBook.getId(), "ID should be null before DB generates it");
+        assertEquals(specialRequest.title(), savedBook.getTitle());
+        assertEquals(specialRequest.synopsis(), savedBook.getSynopsis());
+        assertEquals(specialRequest.author(), savedBook.getAuthor());
+
+        // Assert: Verify the Service fulfills its return contract
+        assertEquals(expectedBook, result, "Service must return the object returned by the repository");
+
     }
 
     // --------------------------------------------------------------------------------------------
@@ -274,13 +282,11 @@ class BookServiceTest {
     @Test
     void testDelete_Book_ShouldThrowException_WhenIdNotFound() {
 
-        // Arrange: As goal is to test what happens when the resource doesn't exist,
-        // we intentionally simulate DB returning NO result
+        // Arrange: simulate missing record
         when(testBookRepository.findById(testId)).thenReturn(Optional.empty());
 
-        // ACT and ASSERT: throw ResourceNotFoundException when calling the delete method.
+        // ACT and ASSERT: correct exception thrown
         assertThrows(
-            // custom exception to reflect business rules vs technical problem
             ResourceNotFoundException.class,
             () -> testBookService.deleteBookById(testId)
         );
@@ -293,24 +299,30 @@ class BookServiceTest {
     @Test
     void testDeleteBookById_Success() {
 
-        // Arrange:
-        persistedBook.setDeleted(false); // ensure starting state
+        // Arrange: ensure the test book is active
+        persistedBook.setDeleted(false);
 
         when(testBookRepository.findById(testId))
             .thenReturn(Optional.of(persistedBook));
-
-        when(testBookRepository.save(any(Book.class)))
-            .thenReturn(persistedBook);
 
         // Act: call the service method we are testing
         testBookService.deleteBookById(testId);
 
         // Assert: the entity was marked deleted
-        assertTrue(persistedBook.isDeleted());
+        ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
+        verify(testBookRepository, times(1)).save(bookCaptor.capture());
 
-        // Assert: repository methods were called correctly
-        verify(testBookRepository, times(1)).findById(testId);
-        verify(testBookRepository, times(1)).save(persistedBook);
+        // extract from captured object (internal list)
+        Book savedBook = bookCaptor.getValue();
+
+        // Assert: the service correctly marked it as deleted
+        assertTrue(
+            savedBook.isDeleted(),
+            "Book passed to save() should be marked deleted"
+        );
+        // Assert: it is the same ID we attempted to delete
+        assertEquals(testId, savedBook.getId());
+
     }
 
     @Test
