@@ -23,7 +23,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -131,7 +130,8 @@ class BookServiceTest {
         BookRequest specialRequest =
             new BookRequest("Java & Friends!", "Synopsis", "Author");
 
-        Book expectedBook =
+        // The "Future" Book (What the DB returns)
+        Book bookFromDb =
             Book.builder()
                 .id(testId)
                 .title(specialRequest.title())
@@ -139,26 +139,24 @@ class BookServiceTest {
                 .author(specialRequest.author())
                 .build();
 
-        when(testBookRepository.save(any(Book.class))).thenReturn(expectedBook);
+        when(testBookRepository.save(any(Book.class))).thenReturn(bookFromDb);
 
         // Act
         Book result = testBookService.createBook(specialRequest);
 
         // Assert: Verify the Service fulfills its return contract
-        assertEquals(expectedBook, result, "Service must return the object returned by the repository");
+        assertEquals(bookFromDb, result, "Service must return the object returned by the repository");
 
-        // Assert: capture the Book passed to save()
+        // Assert: Capture the "Past" Book (What went INTO the DB)
         ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
         verify(testBookRepository, times(1)).save(bookCaptor.capture());
-        Book savedBook = bookCaptor.getValue();
+        Book bookSentToDb = bookCaptor.getValue();
 
         // Assert
-        assertNotNull(savedBook);
-        assertNull(savedBook.getId(), "ID should be null before DB generates it");
-        assertEquals(specialRequest.title(), savedBook.getTitle());
-        assertEquals(specialRequest.synopsis(), savedBook.getSynopsis());
-        assertEquals(specialRequest.author(), savedBook.getAuthor());
-
+        assertNull(bookSentToDb.getId(), "ID should be null before DB generates it");
+        assertEquals(specialRequest.title(), bookSentToDb.getTitle());
+        assertEquals(specialRequest.synopsis(), bookSentToDb.getSynopsis());
+        assertEquals(specialRequest.author(), bookSentToDb.getAuthor());
     }
 
     @Test
