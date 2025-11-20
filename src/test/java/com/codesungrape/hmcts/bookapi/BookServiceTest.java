@@ -216,14 +216,22 @@ class BookServiceTest {
         // Act
         Book result = testBookService.createBook(request);
 
-        // Assert
-        assertNotNull(result);
+        // Assert 1: Verify the result flow
+        assertEquals(expectedBook, result);
         assertEquals(expectedBook.getId(), result.getId());
         assertEquals(expectedBook.getTitle(), result.getTitle());
         assertEquals(expectedBook.getSynopsis(), result.getSynopsis());
         assertEquals(expectedBook.getAuthor(), result.getAuthor());
 
-        verify(testBookRepository, times(1)).save(any(Book.class));
+        // --- CAPTOR LOGIC ---
+        ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
+        verify(testBookRepository).save(bookCaptor.capture());
+        Book bookSentToDb = bookCaptor.getValue();
+
+        // Assert 2: Verify the Service correctly mapped the LONG strings
+        // This ensures the service didn't truncate/alter the data
+        assertEquals(request.title(), bookSentToDb.getTitle());
+        assertEquals(request.synopsis(), bookSentToDb.getSynopsis());
     }
 
     // --------------------------------------------------------------------------------------------
