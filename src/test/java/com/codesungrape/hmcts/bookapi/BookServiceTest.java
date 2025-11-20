@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -172,51 +174,6 @@ class BookServiceTest {
     }
 
     @Test
-    void testCreateBook_NullTitle_ThrowsException() {
-        // Arrange
-        BookRequest invalidRequest = new BookRequest(null, "Synopsis", "Author");
-
-        // Act & Assert
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-                testBookService.createBook(invalidRequest);
-            }
-        );
-
-        // Verify repository was never called
-        verify(testBookRepository, never()).save(any());
-    }
-
-    @Test
-    void testCreateBook_EmptyTitle_ThrowsException() {
-        // Arrange
-        BookRequest invalidRequest = new BookRequest("", "Synopsis", "Author");
-
-        // Act & Assert
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-                testBookService.createBook(invalidRequest);
-            }
-        );
-    }
-
-    @Test
-    void testCreateBook_BlankTitle_ThrowsException() {
-        // Arrange
-        BookRequest invalidRequest = new BookRequest("   ", "Synopsis", "Author");
-
-        // Act & Assert
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-                testBookService.createBook(invalidRequest);
-            }
-        );
-    }
-
-    @Test
     void testCreateBook_RepositoryFailure_ThrowsException() {
         // Arrange
         when(testBookRepository.save(any(Book.class)))
@@ -229,6 +186,19 @@ class BookServiceTest {
                 testBookService.createBook(validBookRequest);
             }
         );
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource // Covers Null and "" (Empty)
+    @ValueSource(strings = {"   ", "\t", "\n"}) // Covers Blank (Spaces/Tabs)
+    void testCreateBook_InvalidTitle_ThrowsException(String invalidTitle) {
+        // Arrange
+        BookRequest invalidRequest = new BookRequest(invalidTitle, "Synopsis", "Author");
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            testBookService.createBook(invalidRequest);
+        });
     }
 
     // ----- EDGE cases ---------
