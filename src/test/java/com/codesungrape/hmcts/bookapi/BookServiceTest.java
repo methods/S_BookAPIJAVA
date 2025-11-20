@@ -144,6 +144,9 @@ class BookServiceTest {
         // Act
         Book result = testBookService.createBook(specialRequest);
 
+        // Assert: Verify the Service fulfills its return contract
+        assertEquals(expectedBook, result, "Service must return the object returned by the repository");
+
         // Assert: capture the Book passed to save()
         ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
         verify(testBookRepository, times(1)).save(bookCaptor.capture());
@@ -156,11 +159,7 @@ class BookServiceTest {
         assertEquals(specialRequest.synopsis(), savedBook.getSynopsis());
         assertEquals(specialRequest.author(), savedBook.getAuthor());
 
-        // Assert: Verify the Service fulfills its return contract
-        assertEquals(expectedBook, result, "Service must return the object returned by the repository");
-
     }
-
 
     @Test
     void testCreateBook_NullRequest_ThrowsException() {
