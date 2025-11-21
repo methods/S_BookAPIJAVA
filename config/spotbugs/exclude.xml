@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <!--
+      EI_EXPOSE_REP2: Storing an external mutable object into the internal representation.
+      We disable this for Spring Components because Dependency Injection (DI)
+      by definition injects beans into other beans.
+  -->
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+    <Or>
+      <Class name="~.*Controller"/>
+      <Class name="~.*Service"/>
+      <Class name="~.*Repository"/>
+    </Or>
+  </Match>
+</FindBugsFilter>

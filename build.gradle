@@ -132,6 +132,8 @@ spotbugs {
     toolVersion = '4.8.3'
     // Fail the build on any identified issue
     ignoreFailures = false
+
+    excludeFilter = file("config/spotbugs/exclude.xml")
 }
 
 // Aggregate SpotBugs task
